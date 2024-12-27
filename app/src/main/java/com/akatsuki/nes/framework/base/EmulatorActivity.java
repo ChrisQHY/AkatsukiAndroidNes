@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.akatsuki.nes.framework.BaseApplication;
 import com.akatsuki.nes.framework.Emulator;
 import com.akatsuki.nes.framework.EmulatorController;
 import com.akatsuki.nes.framework.EmulatorException;
@@ -578,9 +577,7 @@ public abstract class EmulatorActivity extends Activity
         menu.add(R.string.game_menu_cheats, R.drawable.ic_cheats);
         menu.add(R.string.game_menu_back_to_past, R.drawable.ic_time_machine);
         menu.add(R.string.game_menu_screenshot, R.drawable.ic_make_screenshot);
-        BaseApplication ea = (BaseApplication) getApplication();
-        int settingsStringRes = ea.hasGameMenu() ?
-                R.string.game_menu_settings : R.string.gallery_menu_pref;
+        int settingsStringRes =  R.string.game_menu_settings;
         menu.add(settingsStringRes, R.drawable.ic_game_settings);
     }
 

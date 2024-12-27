@@ -1,11 +1,11 @@
 package com.akatsuki.nes
 
-import com.akatsuki.nes.framework.BaseApplication
+import android.app.Application
 import com.akatsuki.nes.framework.base.EmulatorHolder
 import java.io.File
 import java.io.FileOutputStream
 
-class NesApplication:BaseApplication() {
+class NesApplication:Application() {
 
     override fun onCreate() {
         super.onCreate()
@@ -31,9 +31,5 @@ class NesApplication:BaseApplication() {
         }
 
         EmulatorHolder.setEmulatorClass(NesEmulator::class.java)
-    }
-
-    override fun hasGameMenu():Boolean {
-        return true
     }
 }

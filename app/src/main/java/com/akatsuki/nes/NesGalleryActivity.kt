@@ -1,61 +1,97 @@
-package com.akatsuki.nes;
+package com.akatsuki.nes
 
-import android.annotation.TargetApi;
-import android.content.Intent;
-import android.os.Build;
-import android.os.Bundle;
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.os.Bundle
+import android.preference.PreferenceActivity
+import android.view.Menu
+import android.view.MenuItem
+import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.akatsuki.nes.databinding.VGalleryBinding
+import com.akatsuki.nes.databinding.VGalleryRecyclerItemBinding
+import com.akatsuki.nes.framework.base.EmulatorActivity
+import com.akatsuki.nes.framework.ui.gamegallery.GameDescription
+import com.akatsuki.nes.framework.ui.preferences.GeneralPreferenceActivity
+import com.akatsuki.nes.framework.ui.preferences.GeneralPreferenceFragment
+import java.io.File
 
-import java.util.HashSet;
-import java.util.Set;
+class NesGalleryActivity:AppCompatActivity() {
+    private val binding by lazy {VGalleryBinding.inflate(layoutInflater)}
+    private var games = mutableListOf<GameDescription>()
 
-import com.akatsuki.nes.framework.Emulator;
-import com.akatsuki.nes.framework.base.EmulatorActivity;
-import com.akatsuki.nes.framework.base.OpenGLTestActivity;
-import com.akatsuki.nes.framework.ui.gamegallery.GalleryActivity;
-import com.akatsuki.nes.framework.ui.preferences.PreferenceUtil;
-import com.akatsuki.nes.framework.utils.EmuUtils;
-import com.akatsuki.nes.framework.utils.NLog;
+    override fun onCreate(savedInstanceState:Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(binding.root)
+        setSupportActionBar(binding.tbGameGallery)
 
-public class NesGalleryActivity extends GalleryActivity {
-
-    private static final int REQUEST_CHECK_OPENGL = 200;
-
-    @Override
-    public Emulator getEmulatorInstance() {
-        return NesEmulator.getInstance();
+        binding.rvGameGallery.layoutManager = LinearLayoutManager(this)
+        binding.rvGameGallery.adapter = GalleryAdapter()
     }
 
-    @Override
-    public Class<? extends EmulatorActivity> getEmulatorActivityClass() {
-        return NesEmulatorActivity.class;
+    override fun onResume() {
+        super.onResume()
+        loadGames()
     }
 
-    @Override
-    protected Set<String> getRomExtensions() {
-        HashSet<String> set = new HashSet<>();
-        set.add("nes");
-        set.add("fds");
-        return set;
+    override fun onCreateOptionsMenu(menu:Menu?):Boolean {
+        menuInflater.inflate(R.menu.gallery_main_menu, menu)
+        return super.onCreateOptionsMenu(menu)
     }
 
+    override fun onOptionsItemSelected(item:MenuItem):Boolean {
+        val itemId = item.itemId
+        when(itemId) {
+            R.id.gallery_menu_pref -> {
+                val i = Intent(this, GeneralPreferenceActivity::class.java)
+                i.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, GeneralPreferenceFragment::class.java.name)
+                i.putExtra(PreferenceActivity.EXTRA_NO_HEADERS, true)
+                startActivity(i)
+                return true
+            }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (PreferenceUtil.getFragmentShader(this) == -1
-                && EmuUtils.checkGL20Support(this)) {
-            Intent intent = new Intent(this, OpenGLTestActivity.class);
-            startActivityForResult(intent, REQUEST_CHECK_OPENGL);
+            else -> return super.onOptionsItemSelected(item)
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CHECK_OPENGL) {
-            NLog.e("opengl", "opengl: " + resultCode);
-            PreferenceUtil.setFragmentShader(this, resultCode);
+    @SuppressLint("NotifyDataSetChanged")
+    private fun loadGames() {
+        games.clear()
+        File(filesDir.toString()).listFiles()?.let {files ->
+            for(file in files) {
+                if(file.name.uppercase().contains(".NES")) {
+                    val game = GameDescription(file)
+                    game.inserTime = System.currentTimeMillis()
+                    games.add(game)
+                }
+            }
+        }
+        binding.rvGameGallery.adapter?.notifyDataSetChanged()
+    }
+
+    inner class GalleryAdapter:Adapter<GalleryAdapter.Holder>() {
+        inner class Holder(val binding:VGalleryRecyclerItemBinding):ViewHolder(binding.root)
+
+        override fun getItemCount() = games.size
+
+        override fun onCreateViewHolder(parent:ViewGroup, viewType:Int) =
+            Holder(VGalleryRecyclerItemBinding.inflate(layoutInflater, parent, false))
+
+        override fun onBindViewHolder(holder:Holder, position:Int) {
+            holder.binding.root.apply {
+                text = games[position].name
+                setOnClickListener {
+                    Intent(this@NesGalleryActivity, NesEmulatorActivity::class.java).let {
+                        it.putExtra(EmulatorActivity.EXTRA_GAME, games[position])
+                        it.putExtra(EmulatorActivity.EXTRA_SLOT, 0)
+                        it.putExtra(EmulatorActivity.EXTRA_FROM_GALLERY, true)
+                        startActivity(it)
+                    }
+                }
+            }
         }
     }
 }
