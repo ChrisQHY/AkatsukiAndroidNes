@@ -60,7 +60,7 @@ class NesGalleryActivity:AppCompatActivity() {
     @SuppressLint("NotifyDataSetChanged")
     private fun loadGames() {
         games.clear()
-        File(filesDir.toString()).listFiles()?.let {files ->
+        File("$filesDir/Rom").listFiles()?.let {files ->
             for(file in files) {
                 if(file.name.uppercase().contains(".NES")) {
                     val game = GameDescription(file)

@@ -13,7 +13,10 @@ class NesApplication:Application() {
         assets.list("nes")?.let {nesFiles ->
             for(nesFile in nesFiles) {
                 val inputStream = assets.open("nes/$nesFile")
-                val outFile = File(filesDir, nesFile)
+                if(!File(filesDir, "Rom").exists()) {
+                    File(filesDir, "Rom").mkdir()
+                }
+                val outFile = File("$filesDir/Rom", nesFile)
                 if(outFile.exists()) {
                     inputStream.close()
                     continue

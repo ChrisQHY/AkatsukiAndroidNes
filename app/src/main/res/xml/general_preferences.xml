@@ -2,7 +2,7 @@
     <PreferenceCategory
         android:key="pref_general_settings_cat"
         android:title="@string/pref_general_settings">
-        <com.akatsuki.nes.framework.ui.preferences.ControllableListPreference
+        <ListPreference
             android:defaultValue="1"
             android:entries="@array/general_pref_quality_list"
             android:entryValues="@array/general_pref_quality_values"
@@ -156,7 +156,7 @@
     <PreferenceCategory
         android:key="pref_keyboard_cat"
         android:title="@string/key_pref">
-        <com.akatsuki.nes.framework.ui.preferences.ControllableListPreference
+        <ListPreference
             android:key="pref_game_keyboard_profile"
             android:title="@string/key_select_profile_pref" />
 

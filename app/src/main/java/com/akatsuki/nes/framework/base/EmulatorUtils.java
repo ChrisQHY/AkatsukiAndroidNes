@@ -11,11 +11,11 @@ public class EmulatorUtils {
 
     public static String getBaseDir(Context context) {
         File dir = null;
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            dir = context.getExternalFilesDir(null);
-        }
         if (dir == null) {
-            dir = context.getFilesDir();
+            if(!new File(context.getFilesDir() + "/AutoSave").exists()) {
+                new File(context.getFilesDir() + "/AutoSave").mkdir();
+            }
+            dir = new File(context.getFilesDir() + "/AutoSave");
         }
         if (dir == null || !dir.exists()) {
             throw new EmulatorException("No working directory");
